@@ -7,10 +7,13 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5434/hibernate_learning
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5434/userServiceDB
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
 
+  jpa:
+    hibernate:
+      ddl-auto: update
 
   kafka:
     bootstrap-servers: localhost:9092

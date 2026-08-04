@@ -9,6 +9,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import ru.zumber.learning.formessagedto.Operation;
+import ru.zumber.learning.notificationservice.exception.MailSendException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
         } catch (MailException e) {
             logger.error("Отправить письмо пользователю {}, не удалось", email, e);
+            throw new MailSendException("Ошибка отправки письма "+ email, e);
         }
     }
 
@@ -35,18 +37,12 @@ public class EmailServiceImpl implements EmailService {
         message.setTo(email);
         switch (operation) {
             case CREATE -> {
-                message.setSubject("Сохранение пользователя");
-                message.setText("""
-                        Здравствуйте!
-                        Пользователь был успешно сохранен в БД
-                        """);
+                message.setSubject("Ваш аккаунт был создан");
+                message.setText("Здравствуйте! Ваш аккаунт на сайте ваш сайт был успешно создан.");
             }
             case DELETE -> {
-                message.setSubject("Удаление пользователя");
-                message.setText("""
-                        Здравствуйте!
-                        Пользователь был удален
-                        """);
+                message.setSubject("Ваш аккаунт был удалён");
+                message.setText("Здравствуйте! Ваш аккаунт был удалён.");
             }
         }
         return message;

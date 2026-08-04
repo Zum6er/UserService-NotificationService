@@ -1,6 +1,7 @@
 package ru.zumber.learning.userservice.controller;
 
 import ru.zumber.learning.userservice.exception.NoCorrectUser;
+import ru.zumber.learning.userservice.exception.UserEmailDuplicated;
 import ru.zumber.learning.userservice.exception.UserNotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,7 @@ public class BadControllerAdvice {
     public ResponseEntity<ProblemDetail> handleUserNotFound(UserNotFound userNotFound){
         logger.warn(userNotFound.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, userNotFound.getMessage()));
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Пользователь не был найден"));
     }
 
     @ExceptionHandler(NoCorrectUser.class)
@@ -28,10 +29,18 @@ public class BadControllerAdvice {
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, noCorrectUser.getMessage()));
     }
 
+    @ExceptionHandler(UserEmailDuplicated.class)
+    public ResponseEntity<ProblemDetail> handleUserEmailDuplicated(UserEmailDuplicated userEmailDuplicated){
+        logger.warn(userEmailDuplicated.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, userEmailDuplicated.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleException(Exception exception){
         logger.error("Непредвиденная ошибка ", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage()));
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Пожалуйста повторите попытку позже"));
     }
 }

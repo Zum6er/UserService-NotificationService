@@ -41,3 +41,21 @@ services:
 
     depends_on:
       - kafka
+
+  postgres:
+    image: postgres:latest
+    container_name: postgrest_aston
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: userServiceDB
+      POSTGRES_USER: ${CONTEINER_POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${CONTEINER_POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+volumes:
+  postgres_data:
