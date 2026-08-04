@@ -18,6 +18,5 @@ public class UserEventListener {
     public void listen(MessageDTO messageDTO) {
         logger.info("Получено сообщение: {}", messageDTO);
         emailService.sendEmail(messageDTO.operation(), messageDTO.email());
-
     }
 }

@@ -1,5 +1,8 @@
 package ru.zumber.learning.userservice.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.zumber.learning.formessagedto.MessageDTO;
 import ru.zumber.learning.formessagedto.Operation;
 import ru.zumber.learning.userservice.dto.UserDTO;
@@ -10,9 +13,6 @@ import ru.zumber.learning.userservice.exception.UserNotFound;
 import ru.zumber.learning.userservice.mapping.UserMapper;
 import ru.zumber.learning.userservice.repository.UserRepository;
 import ru.zumber.learning.userservice.validation.UserValidation;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +37,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO save(UserDTOForCreateAndUpdate userDTOForCreateAndUpdate) {
         validate(userDTOForCreateAndUpdate);
+        if (emailExists(userDTOForCreateAndUpdate.getEmail())) {
+            throw new NoCorrectUser("Пользователь с данным email уже существует");
+        }
         User user = userMapper.toUserFromCreateDTO(userDTOForCreateAndUpdate);
         user.setCreatedAt(LocalDate.now());
         User saveUser = userRepository.save(user);
@@ -72,6 +75,11 @@ public class UserServiceImpl implements UserService {
                 new UserNotFound("Пользователь с id = " + id + "не найден при удалении пользователя"));
         userRepository.delete(user);
         userEventProducer.sendMessage(new MessageDTO(Operation.DELETE, user.getEmail()));
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     private void validate(UserDTOForCreateAndUpdate userDTOForCreateAndUpdate) {

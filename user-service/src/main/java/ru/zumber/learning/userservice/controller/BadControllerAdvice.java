@@ -18,7 +18,7 @@ public class BadControllerAdvice {
     public ResponseEntity<ProblemDetail> handleUserNotFound(UserNotFound userNotFound){
         logger.warn(userNotFound.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, userNotFound.getMessage()));
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Пользователь не был найден"));
     }
 
     @ExceptionHandler(NoCorrectUser.class)
@@ -32,6 +32,7 @@ public class BadControllerAdvice {
     public ResponseEntity<ProblemDetail> handleException(Exception exception){
         logger.error("Непредвиденная ошибка ", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage()));
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Пожалуйста повторите попытку позже"));
     }
 }

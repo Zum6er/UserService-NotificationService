@@ -8,6 +8,6 @@ public class CheckLong extends NameValidator{
     protected void validate(String value, List<String> errors) {
         int length = value.length();
         if (length < 3 || length > 20)
-            errors.add("Имя должно содержать больше 3 и меньше 21 символа");
+            errors.add("Имя должно содержать больше 2 и меньше 21 символа");
     }
 }

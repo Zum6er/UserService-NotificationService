@@ -18,4 +18,6 @@ public interface UserService {
     UserDTO update(Integer id, UserDTOForCreateAndUpdate userDTOForCreateAndUpdate);
 
     void delete(Integer id);
+
+    boolean emailExists(String email);
 }
