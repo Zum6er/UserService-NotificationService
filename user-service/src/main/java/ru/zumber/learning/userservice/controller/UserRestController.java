@@ -37,7 +37,7 @@ public class UserRestController {
                             description = "Список всех пользователей получен",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     array = @ArraySchema(schema =
-                                    @Schema(implementation = UserDTO.class))
+                                    @Schema(implementation = CollectionModel.class))
                             )
                     ),
                     @ApiResponse(responseCode = "500", ref = "#/components/responses/500")
@@ -59,7 +59,7 @@ public class UserRestController {
                     @ApiResponse(responseCode = "200",
                             description = "Успешное получение пользователя",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = UserDTO.class)
+                                    schema = @Schema(implementation = EntityModel.class)
                             )
                     ),
                     @ApiResponse(responseCode = "404", ref = "#/components/responses/404"),
@@ -78,7 +78,7 @@ public class UserRestController {
                     @ApiResponse(responseCode = "201",
                             description = "Успешное сохранение пользователя",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = UserDTO.class)
+                                    schema = @Schema(implementation = EntityModel.class)
                             )
                     ),
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/400"),
@@ -101,7 +101,7 @@ public class UserRestController {
                     @ApiResponse(responseCode = "200",
                             description = "Успешное обновление пользователя",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = UserDTO.class)
+                                    schema = @Schema(implementation = EntityModel.class)
                             )
                     ),
                     @ApiResponse(responseCode = "400", ref = "#/components/responses/400"),
