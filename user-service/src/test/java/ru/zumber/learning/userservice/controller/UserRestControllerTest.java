@@ -1,5 +1,8 @@
 package ru.zumber.learning.userservice.controller;
 
+import org.springframework.hateoas.EntityModel;
+import org.springframework.test.context.ActiveProfiles;
+import ru.zumber.learning.userservice.assembler.UserModelAssembler;
 import ru.zumber.learning.userservice.dto.UserDTO;
 import ru.zumber.learning.userservice.dto.UserDTOForCreateAndUpdate;
 import ru.zumber.learning.userservice.exception.NoCorrectUser;
@@ -20,10 +23,10 @@ import java.util.List;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserRestController.class)
+@ActiveProfiles("test")
 class UserRestControllerTest {
 
     @Autowired
@@ -31,6 +34,9 @@ class UserRestControllerTest {
 
     @MockitoBean
     UserService userService;
+
+    @MockitoBean
+    UserModelAssembler userAssembler;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -46,18 +52,27 @@ class UserRestControllerTest {
         UserDTO userDTO3 = UserDTO.builder()
                 .id(3).name("TestNameC").email("TestEmailC@test.test").age(34).build();
         List<UserDTO> userDTOList = List.of(userDTO, userDTO2, userDTO3);
+        EntityModel<UserDTO> entityModel = EntityModel.of(userDTO);
+        EntityModel<UserDTO> entityModel2 = EntityModel.of(userDTO2);
+        EntityModel<UserDTO> entityModel3 = EntityModel.of(userDTO3);
         given(userService.findAll()).willReturn(userDTOList);
+        given(userAssembler.toModel(userDTO)).willReturn(entityModel);
+        given(userAssembler.toModel(userDTO2)).willReturn(entityModel2);
+        given(userAssembler.toModel(userDTO3)).willReturn(entityModel3);
         //When
         mockMvc.perform(get("/user"))
                 //Then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[1].name").value("TestNameB"))
-                .andExpect(jsonPath("$[2].age").value(34));
+                .andExpect(jsonPath("$._embedded.userDTOList").isArray())
+                .andExpect(jsonPath("$._embedded.userDTOList.length()").value(3))
+                .andExpect(jsonPath("$._embedded.userDTOList[0].id").value(1))
+                .andExpect(jsonPath("$._embedded.userDTOList[1].name").value("TestNameB"))
+                .andExpect(jsonPath("$._embedded.userDTOList[2].age").value(34));
         verify(userService).findAll();
-        verifyNoMoreInteractions(userService);
+        verify(userAssembler).toModel(userDTO);
+        verify(userAssembler).toModel(userDTO2);
+        verify(userAssembler).toModel(userDTO3);
+        verifyNoMoreInteractions(userService, userAssembler);
     }
 
     @Test
@@ -69,8 +84,7 @@ class UserRestControllerTest {
         mockMvc.perform(get("/user"))
                 //Then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$._embedded").doesNotExist());
         verify(userService).findAll();
         verifyNoMoreInteractions(userService);
     }
@@ -85,7 +99,9 @@ class UserRestControllerTest {
                 .email("TestEmail@test.test")
                 .age(34)
                 .build();
+        EntityModel<UserDTO> entityModel = EntityModel.of(userDTO);
         given(userService.getUser(1)).willReturn(userDTO);
+        given(userAssembler.toModel(userDTO)).willReturn(entityModel);
         //When
         mockMvc.perform(get("/user/1"))
                 //Then
@@ -96,21 +112,22 @@ class UserRestControllerTest {
                 .andExpect(jsonPath("$.age").value(34));
 
         verify(userService).getUser(1);
-        verifyNoMoreInteractions(userService);
+        verify(userAssembler).toModel(userDTO);
+        verifyNoMoreInteractions(userService, userAssembler);
     }
 
     @Test
     @DisplayName("Получить не существующего пользователя по Id")
     void getUserByIdNotFound() throws Exception {
         //Given
-        given(userService.getUser(1)).willThrow(new UserNotFound("Пользователь с 1 не найден"));
+        given(userService.getUser(1)).willThrow(new UserNotFound("Пользователь не был найден"));
         //When
         mockMvc.perform(get("/user/1"))
                 //Then
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
                 .andExpect(jsonPath("$.detail")
-                        .value("Пользователь с 1 не найден"));
+                        .value("Пользователь не был найден"));
         verify(userService).getUser(1);
         verifyNoMoreInteractions(userService);
     }
@@ -124,7 +141,9 @@ class UserRestControllerTest {
                 .name("NameA").email("EmailA@test.test").age(43).build();
         UserDTO userDTO = UserDTO.builder()
                 .id(1).name("NameA").email("EmailA@test.test").age(43).build();
+        EntityModel<UserDTO> entityModel = EntityModel.of(userDTO);
         given(userService.save(userDTOForCreateAndUpdate)).willReturn(userDTO);
+        given(userAssembler.toModel(userDTO)).willReturn(entityModel);
         //When
         mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +155,8 @@ class UserRestControllerTest {
                 .andExpect(jsonPath("$.email").value("EmailA@test.test"))
                 .andExpect(jsonPath("$.age").value(43));
         verify(userService).save(userDTOForCreateAndUpdate);
-        verifyNoMoreInteractions(userService);
+        verify(userAssembler).toModel(userDTO);
+        verifyNoMoreInteractions(userService, userAssembler);
     }
 
     @Test
@@ -168,7 +188,9 @@ class UserRestControllerTest {
                 .name("NameA").email("EmailA@test.test").age(43).build();
         UserDTO userDTO = UserDTO.builder()
                 .id(1).name("NameA").email("EmailA@test.test").age(43).build();
+        EntityModel<UserDTO> entityModel = EntityModel.of(userDTO);
         given(userService.update(1, userDTOForCreateAndUpdate)).willReturn(userDTO);
+        given(userAssembler.toModel(userDTO)).willReturn(entityModel);
         //When
         mockMvc.perform(put("/user/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -180,7 +202,8 @@ class UserRestControllerTest {
                 .andExpect(jsonPath("$.email").value("EmailA@test.test"))
                 .andExpect(jsonPath("$.age").value(43));
         verify(userService).update(1, userDTOForCreateAndUpdate);
-        verifyNoMoreInteractions(userService);
+        verify(userAssembler).toModel(userDTO);
+        verifyNoMoreInteractions(userService, userAssembler);
     }
 
     @Test
@@ -198,7 +221,7 @@ class UserRestControllerTest {
                 //Then
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
-                .andExpect(jsonPath("$.detail").value("Пользователь для обновления не найден"));
+                .andExpect(jsonPath("$.detail").value("Пользователь не был найден"));
         verify(userService).update(eq(1), any(UserDTOForCreateAndUpdate.class));
         verifyNoMoreInteractions(userService);
     }
@@ -239,7 +262,7 @@ class UserRestControllerTest {
     @DisplayName("Удаление не существующего пользователя")
     void deleteUserByIdNotFound() throws Exception {
         //Given
-        doThrow(new UserNotFound("Пользователь с id = 1 не найден при удалении пользователя"))
+        doThrow(new UserNotFound("Пользователь не был найден"))
                 .when(userService).delete(1);
         //When
         mockMvc.perform(delete("/user/1"))
@@ -247,7 +270,7 @@ class UserRestControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.title").value("Not Found"))
                 .andExpect(jsonPath("$.detail")
-                        .value("Пользователь с id = 1 не найден при удалении пользователя"));
+                        .value("Пользователь не был найден"));
 
         verify(userService).delete(1);
         verifyNoMoreInteractions(userService);

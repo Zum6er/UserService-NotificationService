@@ -11,8 +11,8 @@
     <groupId>ru.zumber.learning</groupId>
     <artifactId>gateway-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>api-gateway</name>
-    <description>api-gateway</description>
+    <name>gateway-service</name>
+    <description>gateway-service</description>
     <url/>
     <licenses>
         <license/>

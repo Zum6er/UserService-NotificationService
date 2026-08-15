@@ -42,10 +42,10 @@ class EmailControllerTestIT extends AbstractEmailControllerIT {
         MimeMessage message = messages[0];
 
         assertEquals("test1@test.test", message.getAllRecipients()[0].toString());
-        assertEquals("Сохранение пользователя", message.getSubject());
+        assertEquals("Ваш аккаунт был создан", message.getSubject());
 
         String body = message.getContent().toString();
-        assertTrue(body.contains("успешно сохранен"));
+        assertTrue(body.contains("был успешно создан"));
     }
 
     @Test
@@ -64,10 +64,10 @@ class EmailControllerTestIT extends AbstractEmailControllerIT {
 
         MimeMessage message = messages[0];
         assertEquals("test1@test.test", message.getAllRecipients()[0].toString());
-        assertEquals("Удаление пользователя", message.getSubject());
+        assertEquals("Ваш аккаунт был удалён", message.getSubject());
 
         String body = message.getContent().toString();
-        assertTrue(body.contains("был удален"));
+        assertTrue(body.contains("был удалён"));
     }
 
 }
