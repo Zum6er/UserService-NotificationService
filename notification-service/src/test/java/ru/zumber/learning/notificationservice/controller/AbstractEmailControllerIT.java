@@ -16,6 +16,7 @@ import org.springframework.test.context.DynamicPropertySource;
 public class AbstractEmailControllerIT {
 
     private static final ServerSetup serverSetup =
+//            ServerSetup.SMTP.dynamicPort();
             new ServerSetup(3025, null, ServerSetup.PROTOCOL_SMTP);
 
     @RegisterExtension

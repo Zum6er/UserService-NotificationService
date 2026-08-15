@@ -83,13 +83,13 @@ class UserRestControllerTestIT extends AbstractControllerForIT {
                 //Then
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].id").exists())
-                .andExpect(jsonPath("$[1].id").isNumber())
-                .andExpect(jsonPath("$[1].name").value("NameB"))
-                .andExpect(jsonPath("$[2].email").value("emailC@test.test"))
-                .andExpect(jsonPath("$[0].age").value(34));
+                .andExpect(jsonPath("$._embedded.userDTOList").isArray())
+                .andExpect(jsonPath("$._embedded.userDTOList.length()").value(3))
+                .andExpect(jsonPath("$._embedded.userDTOList[0].id").exists())
+                .andExpect(jsonPath("$._embedded.userDTOList[1].id").isNumber())
+                .andExpect(jsonPath("$._embedded.userDTOList[1].name").value("NameB"))
+                .andExpect(jsonPath("$._embedded.userDTOList[2].email").value("emailC@test.test"))
+                .andExpect(jsonPath("$._embedded.userDTOList[0].age").value(34));
     }
 
     @Test
